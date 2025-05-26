@@ -1,27 +1,13 @@
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import NavBar from './Module 4/React Router - Navigation in React/NavBar';
+import React from 'react';
+import Counter from './Module 4/Redux Toolkit - State Management in React/Counter_Redux/Counter';
 
-const Home = lazy(() => import('./Module 4/React Router - Navigation in React/Home'));
-const About = lazy(() => import('./Module 4/React Router - Navigation in React/About'));
-const Contact = lazy(() => import('./Module 4/React Router - Navigation in React/Contact'));
-const Subpage = lazy(() => import('./Module 4/React Router - Navigation in React/Subpage'));
-
-function App() {
+const App = () => {
   return (
-    <BrowserRouter>
-      <NavBar />
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/about/subpage" element={<Subpage />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="*" element={<Home />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+    <div>
+      <h1 style={{ textAlign: 'center' }}>Redux Toolkit Counter App</h1>
+      <Counter />
+    </div>
   );
-}
+};
 
 export default App;
