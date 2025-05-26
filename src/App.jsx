@@ -1,10 +1,11 @@
 import React from 'react';
-import MultistepForm from './Module 4/Advanced React Concepts/Forms/MultistepForm.jsx';
+import FetchData from './Module 4/Advanced React Concepts/Fetching Data Using Fetch API & Axios/FetchData';
 
 function App() {
   return (
     <div>
-      <MultistepForm />
+      <h1>React Fetch API Demo</h1>
+      <FetchData />
     </div>
   );
 }
