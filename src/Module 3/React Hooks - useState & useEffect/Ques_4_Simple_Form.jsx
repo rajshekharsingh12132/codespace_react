@@ -1,11 +1,28 @@
 import React, { useState } from 'react';
 
+// Utility to strip HTML tags from input
+const stripTags = (input) => input.replace(/<\/?[^>]+(>|$)/g, "");
+
 const SimpleForm = () => {
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (event) => {
-    event.preventDefault(); // Prevents page reload
+  const handleChange = (e) => {
+    const sanitizedInput = stripTags(e.target.value.trim());
+    setName(sanitizedInput);
+    if (sanitizedInput) setError('');
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!name) {
+      setError('Name is required.');
+      return;
+    }
+
     alert(`Hello, ${name}!`);
+    setName('');
   };
 
   return (
@@ -15,11 +32,12 @@ const SimpleForm = () => {
         <input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleChange}
           placeholder="Enter your name"
         />
       </label>
       <button type="submit">Submit</button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </form>
   );
 };
