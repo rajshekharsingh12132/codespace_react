@@ -1,24 +1,29 @@
-// Document Title Update
-
-// 1. Goal: Change the document title to reflect the number of button clicks.
-// 2. Steps:
-//     - Initialize a count state using useState .
-//     - Use useEffect to update the document title whenever the count changes.
-//     - Create a button to increase the count and see the document title change.
-//     - Write your code within the file, by the name of component as Title_Update
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const TitleUpdate = () => {
   const [count, setCount] = useState(0);
+  const timeoutRef = useRef(null);
+
+  const updateTitle = (count) => {
+    document.title = `Clicked ${count} ${count === 1 ? 'time' : 'times'}`;
+  };
 
   useEffect(() => {
-    document.title = `Clicked ${count} ${count === 1 ? 'time' : 'times'}`;
+    // Debounce document title update: clear previous timeout if any
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    timeoutRef.current = setTimeout(() => {
+      updateTitle(count);
+    }, 300); // Update title after 300ms of inactivity
+
+    // Cleanup timeout on unmount or count change
+    return () => clearTimeout(timeoutRef.current);
   }, [count]);
 
   return (
     <div>
       <h2>Document Title Update</h2>
-      <button onClick={() => setCount(count + 1)}>Click me</button>
+      <button onClick={() => setCount(prev => prev + 1)}>Click me</button>
       <p>You clicked {count} {count === 1 ? 'time' : 'times'}.</p>
     </div>
   );
