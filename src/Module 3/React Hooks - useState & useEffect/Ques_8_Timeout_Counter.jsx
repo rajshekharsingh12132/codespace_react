@@ -4,14 +4,17 @@ const TimeoutCounter = () => {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    // Set up an interval that increments the counter every second
     const interval = setInterval(() => {
-      setCount(prev => prev + 1);
+      try {
+        setCount(prev => prev + 1); // Safe update
+      } catch (error) {
+        console.error('Failed to update count due to:', error);
+      }
     }, 1000);
 
-    // Clear interval on component unmount
+    // Cleanup interval on component unmount
     return () => clearInterval(interval);
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
 
   return (
     <div>
