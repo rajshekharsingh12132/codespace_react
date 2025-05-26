@@ -1,4 +1,6 @@
+// src/Module 3/Introduction to ReactJS/Ques_5.jsx
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const Profile = ({ name, age }) => {
   return (
@@ -8,6 +10,18 @@ const Profile = ({ name, age }) => {
       <p>Age: {age}</p>
     </div>
   );
+};
+
+// Default values in case props are missing
+Profile.defaultProps = {
+  name: 'Guest',
+  age: 'Unknown',
+};
+
+// Prop type validation
+Profile.propTypes = {
+  name: PropTypes.string,
+  age: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 export default Profile;
