@@ -5,7 +5,18 @@ import { increment, decrement, incrementByAmount } from './counterSlice';
 const Counter = () => {
   const count = useSelector((state) => state.counter.value);
   const dispatch = useDispatch();
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState('');
+
+  // Validate input before dispatching incrementByAmount
+  const handleIncrementByAmount = () => {
+    const value = Number(amount);
+    if (isNaN(value)) {
+      alert('Please enter a valid number');
+      return;
+    }
+    dispatch(incrementByAmount(value));
+    setAmount(''); // Clear input after dispatch
+  };
 
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
@@ -16,10 +27,10 @@ const Counter = () => {
       <input
         type="number"
         value={amount}
-        onChange={(e) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(e.target.value)}
         placeholder="Enter amount"
       />
-      <button onClick={() => dispatch(incrementByAmount(amount))}>
+      <button onClick={handleIncrementByAmount}>
         Increment by Amount
       </button>
     </div>
