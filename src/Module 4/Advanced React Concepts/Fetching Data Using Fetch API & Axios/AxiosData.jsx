@@ -11,15 +11,12 @@ function AxiosData({ maxItems }) {
     try {
       setLoading(true);
       const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
-      if (Array.isArray(response.data)) {
-        setData(response.data.slice(0, maxItems));
-      } else {
-        throw new Error('Invalid data format');
-      }
+      const posts = Array.isArray(response.data) ? response.data.slice(0, maxItems) : [];
+      setData(posts);
       setError('');
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError('Failed to fetch data.');
+      console.error('Fetch error:', err.message);
+      setError('Failed to fetch data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -41,20 +38,21 @@ function AxiosData({ maxItems }) {
       )}
       {!loading && !error && (
         <ul>
-          {data.map(post => (
+          {data.map((post) => (
             <li key={post.id}>{post.title}</li>
           ))}
         </ul>
       )}
 
-      {/* Dev-only inline validation display */}
-      {process.env.NODE_ENV === 'development' && typeof maxItems !== 'number' && (
-        <p style={{ color: 'orange' }}>Warning: maxItems should be a number!</p>
+      {/* Embedded Test  Mode (Developer Visual Cue) */}
+      {process.env.NODE_ENV === 'development' && maxItems > 20 && (
+        <p style={{ color: 'orange' }}>
+          Warning: maxItems is unusually large, consider reducing it for performance.
+        </p>
       )}
     </div>
   );
 }
-
 AxiosData.propTypes = {
   maxItems: PropTypes.number.isRequired,
 };
