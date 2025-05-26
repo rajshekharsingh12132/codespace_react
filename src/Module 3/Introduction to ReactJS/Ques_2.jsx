@@ -1,14 +1,8 @@
-import React, { useMemo } from 'react';
+// src/Module 3/Introduction to ReactJS/Ques_2.jsx
+import React from 'react';
 
 const Ques2 = () => {
-  const currentYear = useMemo(() => {
-    try {
-      return new Date().getFullYear();
-    } catch (error) {
-      console.error("Failed to get current year:", error);
-      return "Year unavailable";
-    }
-  }, []);
+  const currentYear = new Date().getFullYear();
 
   return <p>The current year is {currentYear}.</p>;
 };
