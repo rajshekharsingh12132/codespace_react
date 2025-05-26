@@ -11,7 +11,7 @@ redisClient.set = promisify(redisClient.set).bind(redisClient);
 redisClient.del = promisify(redisClient.del).bind(redisClient);
 redisClient.flushAll = promisify(redisClient.flushAll).bind(redisClient);
 
-// Cache middleware
+// Cache middlewar
 const cache = (key) => {
   return async (req, res, next) => {
     const cacheKey = key || req.originalUrl;

@@ -2,5 +2,5 @@ This is a sample large text file that will be used to demonstrate
 stream processing in Node.js. The file contains multiple lines
 of text that will be processed in chunks rather than loading
 the entire file into memory at once.
-...
+....
 [more content]

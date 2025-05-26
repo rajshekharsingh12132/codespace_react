@@ -1,6 +1,5 @@
 const { redisClient } = require('../utils/cache');
 const Order = require('../models/Order');
-
 exports.getOrderAnalytics = async (req, res, next) => {
   try {
     const cacheKey = `analytics:${req.query.startDate}-${req.query.endDate}`;

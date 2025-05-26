@@ -16,7 +16,7 @@ const connectDB = async () => {
   }
 };
 
-// Cache Mongoose queries
+// Cache Mongoose querie
 const exec = mongoose.Query.prototype.exec;
 mongoose.Query.prototype.cache = function(options = { key: '' }) {
   this.useCache = true;
