@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import SimpleForm from './Module 4/Advanced React Concepts/Forms/SimpleForm';
-import React from 'react';
-import { render } from '@testing-library/react';
-// Error Boundary to catch errors in rendering child components
+import SimpleForm from './Module 4/Advanced React Concepts/Forms/SimpleForm.jsx';
+
+// ErrorBoundary class to catch errors in child components
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -10,49 +9,58 @@ class ErrorBoundary extends Component {
   }
 
   static getDerivedStateFromError(error) {
-    // Update state to show fallback UI
+    // Update state to show fallback UI on error
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // You can log error details here
+    // You can log error to an error reporting service here
     console.error('ErrorBoundary caught an error', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
-      return <h2>Something went wrong while loading the form.</h2>;
+      return <h1>Something went wrong.</h1>;
     }
     return this.props.children;
   }
 }
 
-/**
- * App component: Root component rendering the SimpleForm with error handling.
- */
-const App = () => {
+function App() {
   return (
     <ErrorBoundary>
       <SimpleForm />
     </ErrorBoundary>
   );
-};
+}
 
 export default App;
 
-// --- Simple inline test for ErrorBoundary in App ---
+// --- Inline tests for App.jsx ---
 
 if (process.env.NODE_ENV === 'test') {
-  
-
   (async () => {
     try {
+      const { render, screen } = await import('@testing-library/react');
       render(<App />);
-      console.log('App component render test passed');
-    } catch (err) {
-      console.error('App component render test failed', err);
-      throw err;
+      if (!screen.getByText(/username/i)) {
+        throw new Error('App Inline Test Failed: SimpleForm content missing');
+      }
+      console.log('App Inline Test Passed: SimpleForm renders within ErrorBoundary');
+
+      // Test ErrorBoundary state change manually
+      const boundary = new ErrorBoundary({});
+      if (boundary.state.hasError) {
+        throw new Error('ErrorBoundary initial state should be false');
+      }
+      const derivedState = ErrorBoundary.getDerivedStateFromError(new Error('Test'));
+      if (!derivedState.hasError) {
+        throw new Error('ErrorBoundary did not update state correctly');
+      }
+      console.log('ErrorBoundary Inline Tests Passed');
+    } catch (e) {
+      console.error('App Inline Tests Failed:', e);
+      throw e;
     }
   })();
 }
-
