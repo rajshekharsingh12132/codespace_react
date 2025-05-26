@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 
 const WindowWidth = () => {
-  const [width, setWidth] = useState(window.innerWidth);
+  // Initialize width only if window is defined, fallback to 0
+  const isWindowAvailable = typeof window !== 'undefined';
+  const [width, setWidth] = useState(isWindowAvailable ? window.innerWidth : 0);
 
   useEffect(() => {
+    if (!isWindowAvailable) return;
+
     const handleResize = () => {
       setWidth(window.innerWidth);
     };
 
-    // Add event listener
     window.addEventListener('resize', handleResize);
 
-    // Cleanup on unmount
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [isWindowAvailable]);
 
   return (
     <div>
