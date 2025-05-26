@@ -1,49 +1,25 @@
-import React, { Suspense } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Error Boundary Component for runtime rendering errors
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, info) {
-    console.error('Error caught in App:', error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <h2>Something went wrong while rendering the app.</h2>;
-    }
-    return this.props.children;
-  }
-}
-
-ErrorBoundary.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-// Lazy load ParentComponent to simulate dynamic import and handle fallback gracefully
-const ParentComponent = React.lazy(() =>
-  import('./Module 4/Advanced React Concepts/Optimizing Performance with React Memoization/ParentComponent')
-);
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import TodosPage from './pages/TodosPage';
 
 function App() {
   return (
-    <div className="App">
-      <h1>React App: Optimized Memoization Demo</h1>
-
-      <ErrorBoundary>
-        <Suspense fallback={<p>Loading Optimized Components...</p>}>
-          <ParentComponent />
-        </Suspense>
-      </ErrorBoundary>
-    </div>
+    <Router>
+      <Navbar />
+      <main style={{ padding: '20px' }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/todos" element={<TodosPage />} />
+        </Routes>
+      </main>
+    </Router>
   );
 }
 
