@@ -1,12 +1,16 @@
 import React from 'react';
 
 function Subpage() {
-  return (
-    <div>
-      <h2>Subpage</h2>
-      <p>This is a nested route inside the About section.</p>
-    </div>
-  );
+  try {
+    return (
+      <div>
+        <h2>Subpage</h2>
+        <p>This is a nested route inside the About section.</p>
+      </div>
+    );
+  } catch (error) {
+    return <div>Error loading Subpage.</div>;
+  }
 }
 
-export default Subpage;
+export default React.memo(Subpage);
