@@ -1,5 +1,35 @@
-// List Items Input and Display
-// Description: Build a component that allows users to enter items into a list. Each new item should be added when the "Add" button is clicked, and displayed on the page.
+import React, { useState } from 'react';
 
-// Steps:
-//     - Write your code within the file, by the name of component as List_Item
+const ListItem = () => {
+  const [item, setItem] = useState('');
+  const [list, setList] = useState([]);
+
+  const handleAdd = () => {
+    const trimmedItem = item.trim();
+    if (trimmedItem) {
+      setList(prevList => [...prevList, trimmedItem]);
+      setItem('');
+    }
+  };
+
+  return (
+    <div>
+      <h2>Item List</h2>
+      <input
+        type="text"
+        value={item}
+        placeholder="Enter an item"
+        onChange={(e) => setItem(e.target.value)}
+      />
+      <button onClick={handleAdd}>Add</button>
+
+      <ul>
+        {list.map((entry, index) => (
+          <li key={index}>{entry}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ListItem;
