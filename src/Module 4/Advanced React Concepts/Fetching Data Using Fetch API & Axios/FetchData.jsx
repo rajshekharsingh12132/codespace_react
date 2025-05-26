@@ -4,11 +4,19 @@ const FetchData = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Basic inline test: check if data is an array after fetch
+  useEffect(() => {
+    if (data && !Array.isArray(data)) {
+      console.error('Data fetched is not an array!');
+    }
+  }, [data]);
+
   useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/posts')
       .then((res) => {
         if (!res.ok) {
-          throw new Error('Failed to fetch data');
+          throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
         }
         return res.json();
       })
