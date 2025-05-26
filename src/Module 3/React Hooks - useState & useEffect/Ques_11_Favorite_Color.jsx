@@ -1,8 +1,24 @@
-// Favorite Color
+import React, { useState } from 'react';
 
-// 1. Goal: Allow users to input and display their favorite color.
-// 2. Steps:
-//     - Create a state variable favoriteColor with an initial value of an empty string.
-//     - Implement an input field to update favoriteColor using onChange .
-//     - Display the value of favoriteColor below the input field.
-//     - Write your code within the file, by the name of component as Timeout_Counter
+const FavoriteColor = () => {
+  const [color, setColor] = useState('');
+
+  return (
+    <div>
+      <h2>What's your favorite color?</h2>
+      <input
+        type="text"
+        value={color}
+        onChange={(e) => setColor(e.target.value)}
+        placeholder="Enter color"
+      />
+      {color && (
+        <p>
+          Your favorite color is: <span style={{ color }}>{color}</span>
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default FavoriteColor;
