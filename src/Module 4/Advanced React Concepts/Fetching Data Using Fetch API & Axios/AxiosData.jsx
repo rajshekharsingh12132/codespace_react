@@ -46,7 +46,6 @@ const AxiosData = ({ maxItems = 10 }) => {
         <button onClick={retry}>Retry</button>
       </div>
     );
-
   return (
     <div>
       <h2>Data fetched using Axios</h2>

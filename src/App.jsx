@@ -11,7 +11,7 @@ function App() {
   return (
     <div>
       <h1>React Axios Data Fetch Demo</h1>
-      {/* Render Axios-based data fetcher */}
+      {/* Render Axios-based data fetcher */} 
       <AxiosData maxItems={10} />
     </div>
   );
