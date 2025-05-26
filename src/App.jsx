@@ -6,7 +6,7 @@ function App() {
     <div>
       <h1>React App - Performance Optimization</h1>
       <ParentComponent />
-    </div>
+    </div> 
   );
 }
 
