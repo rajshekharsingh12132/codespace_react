@@ -4,7 +4,6 @@ const FetchData = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/posts')
       .then((res) => {
