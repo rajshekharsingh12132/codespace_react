@@ -2,64 +2,61 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 
-const AxiosData = ({ maxItems = 10 }) => {
+function AxiosData({ maxItems }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
-  // Fetch data using Axios
-  useEffect(() => {
-    axios
-      .get('https://jsonplaceholder.typicode.com/posts')
-      .then((response) => {
-        setData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || 'An error occurred while fetching data.');
-        setLoading(false);
-      });
-  }, []);
-
-  const retry = () => {
-    setLoading(true);
-    setError(null);
-    setData([]);
-    axios
-      .get('https://jsonplaceholder.typicode.com/posts')
-      .then((response) => {
-        setData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || 'An error occurred while retrying.');
-        setLoading(false);
-      });
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
+      if (Array.isArray(response.data)) {
+        setData(response.data.slice(0, maxItems));
+      } else {
+        throw new Error('Invalid data format');
+      }
+      setError('');
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError('Failed to fetch data.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (loading) return <p>Loading data with Axios...</p>;
+  useEffect(() => {
+    fetchData();
+  }, [maxItems]);
 
-  if (error)
-    return (
-      <div>
-        <p style={{ color: 'red' }}>Error: {error}</p>
-        <button onClick={retry}>Retry</button>
-      </div>
-    );
   return (
     <div>
-      <h2>Data fetched using Axios</h2>
-      <ul>
-        {data.slice(0, maxItems).map((item) => (
-          <li key={item.id}>{item.title}</li>
-        ))}
-      </ul>
+      <h2>Posts</h2>
+      {loading && <p>Loading...</p>}
+      {error && (
+        <div>
+          <p style={{ color: 'red' }}>{error}</p>
+          <button onClick={fetchData}>Retry</button>
+        </div>
+      )}
+      {!loading && !error && (
+        <ul>
+          {data.map(post => (
+            <li key={post.id}>{post.title}</li>
+          ))}
+        </ul>
+      )}
+
+      {/* Dev-only inline validation display */}
+      {process.env.NODE_ENV === 'development' && typeof maxItems !== 'number' && (
+        <p style={{ color: 'orange' }}>Warning: maxItems should be a number!</p>
+      )}
     </div>
   );
-};
+}
 
 AxiosData.propTypes = {
-  maxItems: PropTypes.number,
+  maxItems: PropTypes.number.isRequired,
 };
 
 export default AxiosData;

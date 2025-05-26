@@ -1,18 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import AxiosData from './Module 4/Advanced React Concepts/Fetching Data Using Fetch API & Axios/AxiosData';
 
 function App() {
-  useEffect(() => {
-    if (!AxiosData) {
-      console.error('AxiosData component did not load properly.');
-    }
-  }, []);
+  const MAX_ITEMS = 10;
 
   return (
     <div>
-      <h1>React Axios Data Fetch Demo</h1>
-      {/* Render Axios-based data fetcher */} 
-      <AxiosData maxItems={10} />
+      <h1>Axios Data Fetch Example</h1>
+      <AxiosData maxItems={MAX_ITEMS} />
     </div>
   );
 }
