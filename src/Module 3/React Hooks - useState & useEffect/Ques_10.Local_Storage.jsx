@@ -1,7 +1,30 @@
-// Local Storage with useEffect and useState
-// Description: Create a component where the user's input is saved in local storage and persists after page reload.
+import React, { useState, useEffect } from 'react';
 
-// Steps to needed:
-//     - useState(() => {...}) : Initializes the input with local storage value.
-//     - useEffect([input]) : Updates local storage each time input changes.
-//     - Write your code within the file, by the name of component as Local_Storage.
+const LocalStorageInput = () => {
+  const STORAGE_KEY = 'userInput';
+
+  // Initialize state from localStorage or fallback to empty string
+  const [input, setInput] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY) || '';
+  });
+
+  // Update localStorage whenever input changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, input);
+  }, [input]);
+
+  return (
+    <div>
+      <h2>Persistent Input</h2>
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Type something..."
+      />
+      <p>You typed: {input}</p>
+    </div>
+  );
+};
+
+export default LocalStorageInput;
