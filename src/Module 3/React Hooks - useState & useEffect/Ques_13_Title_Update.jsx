@@ -1,32 +1,51 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import TitleUpdate from './Ques_13_Title_Update';
 
-const TitleUpdate = () => {
-  const [count, setCount] = useState(0);
-  const timeoutRef = useRef(null);
+describe('TitleUpdate component', () => {
+  beforeEach(() => {
+    // Reset document title before each test
+    document.title = 'React App';
+    jest.useFakeTimers();
+  });
 
-  const updateTitle = (count) => {
-    document.title = `Clicked ${count} ${count === 1 ? 'time' : 'times'}`;
-  };
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
 
-  useEffect(() => {
-    // Debounce document title update: clear previous timeout if any
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  test('initial renders with count 0 and correct document title', () => {
+    render(<TitleUpdate />);
+    expect(screen.getByText(/You clicked 0 times/i)).toBeInTheDocument();
+    expect(document.title).toBe('React App'); // Initial title not updated yet
+  });
 
-    timeoutRef.current = setTimeout(() => {
-      updateTitle(count);
-    }, 300); // Update title after 300ms of inactivity
+  test('clicking button increments count and updates document title with debounce', () => {
+    render(<TitleUpdate />);
+    const button = screen.getByText(/Click me/i);
 
-    // Cleanup timeout on unmount or count change
-    return () => clearTimeout(timeoutRef.current);
-  }, [count]);
+    fireEvent.click(button);
+    fireEvent.click(button);
+    fireEvent.click(button);
 
-  return (
-    <div>
-      <h2>Document Title Update</h2>
-      <button onClick={() => setCount(prev => prev + 1)}>Click me</button>
-      <p>You clicked {count} {count === 1 ? 'time' : 'times'}.</p>
-    </div>
-  );
-};
+    // The count should be 3 immediately
+    expect(screen.getByText(/You clicked 3 times/i)).toBeInTheDocument();
 
-export default TitleUpdate;
+    // Document title update is debounced - not updated immediately
+    expect(document.title).toBe('React App');
+
+    // Fast-forward debounce timer
+    jest.advanceTimersByTime(300);
+
+    // Now document title should be updated
+    expect(document.title).toBe('Clicked 3 times');
+  });
+
+  test('document title shows singular "time" when count is 1', () => {
+    render(<TitleUpdate />);
+    const button = screen.getByText(/Click me/i);
+    fireEvent.click(button);
+
+    jest.advanceTimersByTime(300);
+    expect(document.title).toBe('Clicked 1 time');
+  });
+});
