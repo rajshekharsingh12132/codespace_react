@@ -1,26 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import AxiosData from './Module 4/Advanced React Concepts/Fetching Data Using Fetch API & Axios/AxiosData';
+import ParentComponent from './Module 4/Advanced React Concepts/Optimizing Performance with React Memoization/ParentComponent';
 
-function App({ maxItems }) {
-  if (typeof maxItems !== 'number' || maxItems <= 0) {
-    console.error('Invalid maxItems prop. It should be a positive number.');
-  }
-
+function App() {
   return (
     <div>
-      <h1>Axios Data Fetch Example</h1>
-      <AxiosData maxItems={maxItems} />
+      <h1>React App - Performance Optimization</h1>
+      <ParentComponent />
     </div>
   );
 }
-
-App.propTypes = {
-  maxItems: PropTypes.number,
-};
-
-App.defaultProps = {
-  maxItems: 10,
-};
 
 export default App;
