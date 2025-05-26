@@ -1,11 +1,12 @@
-import React from 'react'
+import React from 'react';
 
-const Home = () => {
+function Home() {
   return (
     <div>
-      
+      <h2>Home Page</h2>
+      <p>Welcome to the Home page of our React Router demo!</p>
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;

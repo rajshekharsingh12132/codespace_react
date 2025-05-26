@@ -1,11 +1,12 @@
-import React from 'react'
+import React from 'react';
 
-const Subpage = () => {
+function Subpage() {
   return (
     <div>
-      
+      <h2>Subpage</h2>
+      <p>This is a nested route inside the About section.</p>
     </div>
-  )
+  );
 }
 
-export default Subpage
+export default Subpage;
