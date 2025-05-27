@@ -11,7 +11,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// 🔁 Root route
+// 🔁 Root route   
 app.get('/', (req, res) => {
   res.send('Hello from Express!');
 });
