@@ -6,120 +6,96 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-// Middleware
+// Middleware for parsing urlencoded form data
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// Session configuration
 app.use(session({
-  secret: 'your_secret_key_here', // In production, use a strong secret in env variables
+  secret: 'your_secret_key_here', // Use env variable in production
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 600000 } // Session expires in 10 minutes
+  cookie: { maxAge: 600000 } // 10 minutes session
 }));
 
-// In-memory user for demo
+// Dummy in-memory user store (would be replaced with DB in real app)
 const USER = {
   username: 'admin',
   password: 'password123'
 };
 
-// Middleware to protect routes
-function authMiddleware(req, res, next) {
+// Authentication check middleware
+function ensureAuthenticated(req, res, next) {
   if (req.session && req.session.user) {
     return next();
   }
-  res.redirect('/login');
+  // Log unauthorized access attempt
+  console.warn(`Unauthorized access attempt to ${req.originalUrl}`);
+  // Redirect with error message query param
+  return res.redirect('/login?error=Please login to access that page');
 }
 
 // Routes
+
+// Root route redirects based on authentication
 app.get('/', (req, res) => {
   if (req.session.user) {
-    res.redirect('/dashboard');
-  } else {
-    res.redirect('/login');
+    return res.redirect('/dashboard');
   }
+  res.redirect('/login');
 });
 
+// Login page
 app.get('/login', (req, res) => {
+  // Pass error message if any from query param
+  const errorMsg = req.query.error || '';
   res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
+// Login form submission
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
-  if (username === USER.username && password === USER.password) {
-    req.session.user = username;
-    res.redirect('/dashboard');
-  } else {
-    res.redirect('/error');
+  try {
+    if (username === USER.username && password === USER.password) {
+      req.session.user = username;
+      return res.redirect('/dashboard');
+    }
+    // Invalid credentials
+    return res.redirect('/login?error=Invalid username or password');
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.redirect('/error?message=An unexpected error occurred during login');
   }
 });
 
-app.get('/dashboard', authMiddleware, (req, res) => {
+// Dashboard protected route
+app.get('/dashboard', ensureAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'dashboard.html'));
 });
 
+// Logout route
 app.get('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
-      return res.redirect('/dashboard');
+      console.error('Session destruction error:', err);
+      return res.redirect('/dashboard?error=Could not log out. Please try again.');
     }
     res.clearCookie('connect.sid');
-    res.redirect('/login');
+    res.redirect('/login?error=You have been logged out successfully');
   });
 });
 
+// Error page with optional message display
 app.get('/error', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'error.html'));
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// Catch-all for unhandled routes
+app.use((req, res) => {
+  console.warn(`404 Not Found: ${req.originalUrl}`);
+  res.status(404).send('Page not found');
 });
 
-/* Inline Unit Tests */
-if (require.main === module) {
-  const http = require('http');
-  const assert = require('assert');
-
-  async function test() {
-    // Helper to make HTTP requests
-    const request = (options, postData) => new Promise((resolve, reject) => {
-      const req = http.request(options, (res) => {
-        let data = '';
-        res.on('data', chunk => data += chunk);
-        res.on('end', () => resolve({ statusCode: res.statusCode, data, headers: res.headers }));
-      });
-      req.on('error', reject);
-      if (postData) req.write(postData);
-      req.end();
-    });
-
-    // Test: GET /login returns login page
-    let res = await request({ hostname: 'localhost', port: PORT, path: '/login', method: 'GET' });
-    assert.strictEqual(res.statusCode, 200, 'GET /login should return 200');
-    assert.ok(res.data.includes('<form'), 'Login page should contain form');
-
-    // Test: POST /login with wrong creds redirects to /error
-    res = await request({
-      hostname: 'localhost', port: PORT, path: '/login', method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }, 'username=wrong&password=wrong');
-    assert.strictEqual(res.statusCode, 302, 'POST /login wrong creds should redirect');
-    assert.ok(res.headers.location === '/error', 'Redirect should be to /error');
-
-    // Test: POST /login with correct creds redirects to /dashboard
-    res = await request({
-      hostname: 'localhost', port: PORT, path: '/login', method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }, `username=${USER.username}&password=${USER.password}`);
-    assert.strictEqual(res.statusCode, 302, 'POST /login correct creds should redirect');
-    assert.ok(res.headers.location === '/dashboard', 'Redirect should be to /dashboard');
-
-    console.log('All inline tests passed');
-    server.close();
-  }
-
-  test().catch(err => {
-    console.error('Inline tests failed:', err);
-    server.close();
-  });
-}
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});

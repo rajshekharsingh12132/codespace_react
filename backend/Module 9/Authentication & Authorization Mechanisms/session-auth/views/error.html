@@ -6,7 +6,16 @@
 </head>
 <body>
   <h2>Login Failed</h2>
-  <p>Invalid username or password.</p>
+  <p id="message">Invalid username or password.</p>
   <a href="/login">Try again</a>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const msg = params.get('message');
+    if (msg) {
+      document.getElementById('message').textContent = msg;
+    }
+  </script>
 </body>
+
 </html>
