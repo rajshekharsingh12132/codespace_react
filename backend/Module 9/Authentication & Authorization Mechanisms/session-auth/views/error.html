@@ -2,12 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Error</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; color: #b00; }
+    a { color: #007BFF; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
-  <h2>Login Failed</h2>
-  <p id="message">Invalid username or password.</p>
-  <a href="/login">Try again</a>
+  <main>
+    <h1>Authentication Error</h1>
+    <p id="message" role="alert" aria-live="assertive">An error occurred during authentication.</p>
+    <p><a href="/login">Return to Login</a></p>
+  </main>
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -17,5 +25,4 @@
     }
   </script>
 </body>
-
 </html>

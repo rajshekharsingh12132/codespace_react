@@ -2,11 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
+    a.logout { display: inline-block; margin-top: 20px; color: #d00; text-decoration: none; }
+    a.logout:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
-  <h2>Welcome to the Dashboard!</h2>
-  <p>You are logged in.</p>
-  <a href="/logout">Logout</a>
+  <main>
+    <h1>Welcome to your Dashboard</h1>
+    <p>You have successfully logged in.</p>
+    <a href="/logout" class="logout" role="button" aria-label="Logout">Logout</a>
+  </main>
 </body>
 </html>
