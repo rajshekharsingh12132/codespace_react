@@ -1,17 +1,37 @@
 const express = require('express');
-const { query } = require('../db.js');
+const mysql = require('mysql');
+const request = require('supertest'); // For testing
+
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(express.json());
 
-// Helper function for email validation (basic)
-const isValidEmail = (email) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// --- Setup MySQL connection pool ---
+const pool = mysql.createPool({
+  connectionLimit: 10,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASS || '',
+  database: process.env.DB_NAME || 'test_db',
+});
 
-// Routes
+// Utility query function using Promise
+function query(sql, params) {
+  return new Promise((resolve, reject) => {
+    pool.query(sql, params, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+}
+
+// Basic email validator
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// --- Routes ---
 
 // GET all users
 app.get('/users', async (req, res) => {
@@ -25,7 +45,7 @@ app.get('/users', async (req, res) => {
 
 // GET user by ID
 app.get('/users/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const id = Number(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID' });
 
   try {
@@ -40,7 +60,7 @@ app.get('/users/:id', async (req, res) => {
 // POST create user
 app.post('/users', async (req, res) => {
   const { name, email } = req.body;
-  if (!name || !email) return res.status(400).json({ error: 'Name and email are required' });
+  if (!name || !email) return res.status(400).json({ error: 'Name and email required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'Invalid email format' });
 
   try {
@@ -53,11 +73,11 @@ app.post('/users', async (req, res) => {
 
 // PUT update user
 app.put('/users/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const id = Number(req.params.id);
   const { name, email } = req.body;
 
   if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID' });
-  if (!name || !email) return res.status(400).json({ error: 'Name and email are required' });
+  if (!name || !email) return res.status(400).json({ error: 'Name and email required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'Invalid email format' });
 
   try {
@@ -71,7 +91,7 @@ app.put('/users/:id', async (req, res) => {
 
 // DELETE user
 app.delete('/users/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const id = Number(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID' });
 
   try {
@@ -83,6 +103,88 @@ app.delete('/users/:id', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start server if run directly
+const PORT = process.env.PORT || 3000;
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+// Export app for testing
+module.exports = app;
+
+/* --------------------------------------
+ * Inline Unit Tests with Jest + Supertest
+ * -------------------------------------- */
+
+if (process.env.NODE_ENV === 'test') {
+  const testUser = { name: 'Test User', email: 'testuser@example.com' };
+  let createdUserId;
+
+  describe('Users API Endpoints', () => {
+    it('POST /users - create user', async () => {
+      const res = await request(app)
+        .post('/users')
+        .send(testUser)
+        .expect(201);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.name).toBe(testUser.name);
+      expect(res.body.email).toBe(testUser.email);
+      createdUserId = res.body.id;
+    });
+
+    it('GET /users - get all users', async () => {
+      const res = await request(app)
+        .get('/users')
+        .expect(200);
+      expect(Array.isArray(res.body)).toBe(true);
+    });
+
+    it('GET /users/:id - get user by id', async () => {
+      const res = await request(app)
+        .get(`/users/${createdUserId}`)
+        .expect(200);
+      expect(res.body).toHaveProperty('id', createdUserId);
+      expect(res.body.name).toBe(testUser.name);
+    });
+
+    it('PUT /users/:id - update user', async () => {
+      const updatedUser = { name: 'Updated Name', email: 'updated@example.com' };
+      const res = await request(app)
+        .put(`/users/${createdUserId}`)
+        .send(updatedUser)
+        .expect(200);
+      expect(res.body.name).toBe(updatedUser.name);
+      expect(res.body.email).toBe(updatedUser.email);
+    });
+
+    it('DELETE /users/:id - delete user', async () => {
+      const res = await request(app)
+        .delete(`/users/${createdUserId}`)
+        .expect(200);
+      expect(res.body.message).toMatch(/deleted/);
+    });
+
+    it('GET /users/:id - user not found', async () => {
+      const res = await request(app)
+        .get(`/users/999999`)
+        .expect(404);
+      expect(res.body.error).toBe('User not found');
+    });
+
+    it('POST /users - invalid email', async () => {
+      const res = await request(app)
+        .post('/users')
+        .send({ name: 'Name', email: 'bademail' })
+        .expect(400);
+      expect(res.body.error).toBe('Invalid email format');
+    });
+
+    it('PUT /users/:id - invalid id', async () => {
+      const res = await request(app)
+        .put('/users/abc')
+        .send({ name: 'Name', email: 'test@example.com' })
+        .expect(400);
+      expect(res.body.error).toBe('Invalid user ID');
+    });
+  });
+}
