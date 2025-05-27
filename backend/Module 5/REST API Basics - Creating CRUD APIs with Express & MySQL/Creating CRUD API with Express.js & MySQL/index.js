@@ -53,7 +53,7 @@ app.put('/users/:id', (req, res) => {
   });
 });
 
-// Delete a user
+// Delete a user 
 app.delete('/users/:id', (req, res) => {
   const { id } = req.params;
   connection.query('DELETE FROM users WHERE id = ?', [id], (err, result) => {
