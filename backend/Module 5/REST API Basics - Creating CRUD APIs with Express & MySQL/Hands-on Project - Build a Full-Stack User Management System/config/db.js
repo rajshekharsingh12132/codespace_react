@@ -3,22 +3,40 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Create a connection to the MySQL database using environment variables
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,     // Database host, e.g., localhost
-  user: process.env.DB_USER,     // Database username
-  password: process.env.DB_PASS, // Database password
-  database: process.env.DB_NAME, // Database name to use
-  port: 3306,                    // Default MySQL port (optional)
-});
+const config = {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: 3306,
+};
 
-// Connect to the database and handle errors properly
-db.connect((err) => {
-  if (err) {
-    console.error(`Database connection failed: ${err.code} - ${err.message}`);
-    process.exit(1); // Exit process if DB connection fails to avoid app instability
-  }
-  console.log('Successfully connected to the MySQL database.');
-});
+let connection;
 
-module.exports = db;
+function handleDisconnect() {
+  connection = mysql.createConnection(config);
+
+  connection.connect((err) => {
+    if (err) {
+      console.error(`Error connecting to DB: ${err.code} - ${err.message}. Retrying in 5 seconds...`);
+      setTimeout(handleDisconnect, 5000);
+    } else {
+      console.log('Successfully connected to MySQL database.');
+    }
+  });
+
+  // Handle connection errors after initial connection
+  connection.on('error', (err) => {
+    console.error('DB error', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      console.log('Reconnecting lost DB connection...');
+      handleDisconnect();
+    } else {
+      throw err;
+    }
+  });
+}
+
+handleDisconnect();
+
+module.exports = connection;

@@ -1,58 +1,91 @@
 const db = require('../config/db');
 
-// Helper: Simple input validation for user data
+// Basic input validation function for name and email
 function validateUserInput(name, email) {
   if (!name || typeof name !== 'string') return 'Invalid or missing "name"';
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) return 'Invalid or missing "email"';
   return null;
 }
 
-// Create new user
+// Create a new user
 exports.createUser = (req, res) => {
   const { name, email } = req.body;
   const validationError = validateUserInput(name, email);
-  if (validationError) return res.status(400).json({ error: validationError });
+  if (validationError) {
+    console.warn(`Validation failed on createUser: ${validationError}`);
+    return res.status(400).json({ error: validationError });
+  }
 
   const query = 'INSERT INTO users (name, email) VALUES (?, ?)';
   db.query(query, [name, email], (err, result) => {
-    if (err) return res.status(500).json({ error: `DB error: ${err.message}` });
+    if (err) {
+      console.error('DB error in createUser:', err);
+      return res.status(500).json({ error: 'Database error occurred' });
+    }
+    console.log(`User created with ID ${result.insertId}`);
     res.status(201).json({ id: result.insertId, name, email });
   });
 };
 
-// Retrieve all users
+// Get all users
 exports.getUsers = (req, res) => {
   db.query('SELECT * FROM users', (err, results) => {
-    if (err) return res.status(500).json({ error: `DB error: ${err.message}` });
+    if (err) {
+      console.error('DB error in getUsers:', err);
+      return res.status(500).json({ error: 'Database error occurred' });
+    }
     res.json(results);
   });
 };
 
-// Retrieve a single user by ID
+// Get a user by ID
 exports.getUserById = (req, res) => {
   const { id } = req.params;
-  if (isNaN(id)) return res.status(400).json({ error: 'User ID must be a number' });
+  if (isNaN(id)) {
+    console.warn(`Invalid user ID received: ${id}`);
+    return res.status(400).json({ error: 'User ID must be a number' });
+  }
 
   db.query('SELECT * FROM users WHERE id = ?', [id], (err, results) => {
-    if (err) return res.status(500).json({ error: `DB error: ${err.message}` });
-    if (results.length === 0) return res.status(404).json({ message: 'User not found' });
+    if (err) {
+      console.error('DB error in getUserById:', err);
+      return res.status(500).json({ error: 'Database error occurred' });
+    }
+    if (results.length === 0) {
+      console.info(`User not found with ID: ${id}`);
+      return res.status(404).json({ message: 'User not found' });
+    }
     res.json(results[0]);
   });
 };
 
-// Update user details
+// Update user information
 exports.updateUser = (req, res) => {
   const { id } = req.params;
   const { name, email } = req.body;
-  if (isNaN(id)) return res.status(400).json({ error: 'User ID must be a number' });
+
+  if (isNaN(id)) {
+    console.warn(`Invalid user ID received for update: ${id}`);
+    return res.status(400).json({ error: 'User ID must be a number' });
+  }
 
   const validationError = validateUserInput(name, email);
-  if (validationError) return res.status(400).json({ error: validationError });
+  if (validationError) {
+    console.warn(`Validation failed on updateUser: ${validationError}`);
+    return res.status(400).json({ error: validationError });
+  }
 
   const query = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
   db.query(query, [name, email, id], (err, result) => {
-    if (err) return res.status(500).json({ error: `DB error: ${err.message}` });
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'User not found' });
+    if (err) {
+      console.error('DB error in updateUser:', err);
+      return res.status(500).json({ error: 'Database error occurred' });
+    }
+    if (result.affectedRows === 0) {
+      console.info(`User not found for update with ID: ${id}`);
+      return res.status(404).json({ message: 'User not found' });
+    }
+    console.log(`User updated with ID ${id}`);
     res.json({ message: 'User updated successfully' });
   });
 };
@@ -60,11 +93,22 @@ exports.updateUser = (req, res) => {
 // Delete a user
 exports.deleteUser = (req, res) => {
   const { id } = req.params;
-  if (isNaN(id)) return res.status(400).json({ error: 'User ID must be a number' });
+
+  if (isNaN(id)) {
+    console.warn(`Invalid user ID received for delete: ${id}`);
+    return res.status(400).json({ error: 'User ID must be a number' });
+  }
 
   db.query('DELETE FROM users WHERE id = ?', [id], (err, result) => {
-    if (err) return res.status(500).json({ error: `DB error: ${err.message}` });
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'User not found' });
+    if (err) {
+      console.error('DB error in deleteUser:', err);
+      return res.status(500).json({ error: 'Database error occurred' });
+    }
+    if (result.affectedRows === 0) {
+      console.info(`User not found for delete with ID: ${id}`);
+      return res.status(404).json({ message: 'User not found' });
+    }
+    console.log(`User deleted with ID ${id}`);
     res.json({ message: 'User deleted successfully' });
   });
 };
