@@ -6,7 +6,7 @@ const process = require('node:process');
 if (cluster.isPrimary) {
   console.log(`Primary process ${process.pid} is running`);
   
-  // Get number of available CPU cores
+  // Get number of available CPU cores 
   const cpuCount = os.availableParallelism?.() || os.cpus().length;
   console.log(`Launching ${cpuCount} worker processes`);
 
