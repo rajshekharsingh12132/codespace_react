@@ -1,10 +1,58 @@
-// Caching with Redis
-// Description: Implement a simple cache mechanism with Redis to store and retrieve data in a Node.js application.
+// Import the Redis client
+const redis = require('redis');
 
-// Steps:
-// 1. Install Redis client for Node.js by running npm install redis .
-// 2. Create and connect a Redis client using redis.createClient() .
-// 3. Use client.set() to store a key-value pair.
-// 4. Retrieve the stored value with client.get() and log it.
-// 5. Close the connection using client.quit() .
+// Create and connect a Redis client
+const client = redis.createClient();
 
+client.on('error', (err) => {
+  console.error('Redis connection error:', err);
+});
+
+client.connect()
+  .then(async () => {
+    console.log('Connected to Redis');
+
+    // Step 3: Store a key-value pair
+    await client.set('greeting', 'Hello, Redis!');
+
+    // Step 4: Retrieve the stored value
+    const value = await client.get('greeting');
+    console.log('Retrieved value:', value);
+
+    // Step 5: Close the connection
+    await client.quit();
+    console.log('Redis connection closed');
+  })
+  .catch((err) => {
+    console.error('Error connecting to Redis:', err);
+  });
+
+  const assert = require('assert');
+
+(async () => {
+  const redis = require('redis');
+  const client = redis.createClient();
+
+  client.on('error', (err) => {
+    console.error('Redis connection error:', err);
+  });
+
+  try {
+    await client.connect();
+
+    const testKey = 'testKey';
+    const testValue = 'testValue';
+
+    await client.set(testKey, testValue);
+    const retrievedValue = await client.get(testKey);
+
+    // Assert that the retrieved value matches the stored value
+    assert.strictEqual(retrievedValue, testValue, 'Retrieved value does not match stored value');
+
+    console.log('✅ Inline test passed: Value stored and retrieved successfully');
+
+    await client.quit();
+  } catch (err) {
+    console.error('❌ Inline test failed:', err);
+  }
+})();
