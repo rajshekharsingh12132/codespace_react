@@ -4,5 +4,6 @@ module.exports = (requiredRole) => {
       return res.status(403).json({ error: 'Access denied: insufficient role' });
     }
     next();
+    
   };
 };

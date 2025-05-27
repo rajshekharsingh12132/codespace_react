@@ -17,5 +17,5 @@ exports.login = async (req, res) => {
   }
 };
 
-/* Inline Unit Test */
+/* Inline Unit Test */ 
 // curl -X POST http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d '{"username":"admin","password":"admin123"}'

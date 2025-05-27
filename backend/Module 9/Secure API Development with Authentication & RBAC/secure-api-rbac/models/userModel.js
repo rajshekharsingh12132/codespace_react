@@ -10,6 +10,7 @@ class User {
 
 module.exports = User;
 
+
 /* Inline Unit Test */
 // const u = new User(1, 'admin', 'admin123', 'admin');
 // console.log(u instanceof User); // true
