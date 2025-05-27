@@ -1,69 +1,88 @@
 const express = require('express');
-const connection = require('../db.js');
+const { query } = require('../db.js');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON
 app.use(express.json());
 
-// Get all users
-app.get('/users', (req, res) => {
-  connection.query('SELECT * FROM users', (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+// Helper function for email validation (basic)
+const isValidEmail = (email) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+// Routes
+
+// GET all users
+app.get('/users', async (req, res) => {
+  try {
+    const users = await query('SELECT * FROM users');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-// Get user by ID
-app.get('/users/:id', (req, res) => {
-  const { id } = req.params;
-  connection.query('SELECT * FROM users WHERE id = ?', [id], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (results.length === 0) return res.status(404).json({ message: 'User not found' });
-    res.json(results[0]);
-  });
+// GET user by ID
+app.get('/users/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID' });
+
+  try {
+    const users = await query('SELECT * FROM users WHERE id = ?', [id]);
+    if (users.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json(users[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-// Create a new user
-app.post('/users', (req, res) => {
+// POST create user
+app.post('/users', async (req, res) => {
   const { name, email } = req.body;
-  if (!name || !email) return res.status(400).json({ message: 'Name and email are required' });
+  if (!name || !email) return res.status(400).json({ error: 'Name and email are required' });
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'Invalid email format' });
 
-  const sql = 'INSERT INTO users (name, email) VALUES (?, ?)';
-  connection.query(sql, [name, email], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    const result = await query('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
     res.status(201).json({ id: result.insertId, name, email });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-// Update a user
-app.put('/users/:id', (req, res) => {
-  const { id } = req.params;
+// PUT update user
+app.put('/users/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
   const { name, email } = req.body;
 
-  if (!name || !email) return res.status(400).json({ message: 'Name and email are required' });
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID' });
+  if (!name || !email) return res.status(400).json({ error: 'Name and email are required' });
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'Invalid email format' });
 
-  const sql = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
-  connection.query(sql, [name, email, id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'User not found' });
+  try {
+    const result = await query('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ id, name, email });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-// Delete a user 
-app.delete('/users/:id', (req, res) => {
-  const { id } = req.params;
-  connection.query('DELETE FROM users WHERE id = ?', [id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'User not found' });
+// DELETE user
+app.delete('/users/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID' });
+
+  try {
+    const result = await query('DELETE FROM users WHERE id = ?', [id]);
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ message: `User with id ${id} deleted` });
-  });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,19 +1,34 @@
 const mysql = require('mysql');
 require('dotenv').config();
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
+  connectionLimit: 10, // max simultaneous connections
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to My SQL:', err.message);
-    process.exit(1);
-  }
-  console.log('Connected to MySQL database');
+// Simple query wrapper returning Promise for async/await usage
+function query(sql, params) {
+  return new Promise((resolve, reject) => {
+    pool.query(sql, params, (err, results) => {
+      if (err) {
+        console.error('MySQL Query Error:', err);
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
+pool.on('connection', (connection) => {
+  console.log('MySQL pool connected: threadId ' + connection.threadId);
 });
 
-module.exports = connection;
+pool.on('error', (err) => {
+  console.error('MySQL pool error:', err);
+  // Optional: add reconnection logic here if necessary
+});
+
+module.exports = { pool, query };
